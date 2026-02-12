@@ -68,18 +68,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose to window
     window.shop = shop;
 
-    // Listen for Checkout Button
-    const checkoutBtn = document.getElementById('btn-shopify-checkout');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', (e) => {
+    // Listen for Checkout Button (Delegated)
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'btn-shopify-checkout') {
             e.preventDefault();
+            const btn = e.target;
+
+            // Ensure Cart exists
+            if (typeof Cart === 'undefined') {
+                console.error('TSS Error: Cart not loaded');
+                return;
+            }
+
             const cartItems = Cart.get();
             if (cartItems.length > 0) {
-                checkoutBtn.textContent = 'INITIALIZING DROP...'; // Feedback
+                btn.textContent = 'INITIALIZING DROP...'; // Feedback
                 shop.createCheckout(cartItems);
             } else {
                 alert('Supply Crate is empty.');
             }
-        });
-    }
+        }
+    });
 });
