@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | Tactical Stealth Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">TSS<span style="color:var(--accent-color)">.</span></div>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Back into Shadows</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="checkout-container">
+            <div class="checkout-grid">
+                <!-- Left Column: Forms -->
+                <div class="checkout-form">
+                    <h2>Secure Drop Location</h2>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label>Alias / Name</label>
+                            <input type="text" id="input-name" class="form-control" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Secure Comms (Email)</label>
+                            <input type="email" id="input-email" class="form-control" required
+                                placeholder="operative@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Secure Address</label>
+                            <input type="text" id="input-address" class="form-control" required
+                                placeholder="123 Shadow Lane">
+                        </div>
+                        <div class="form-group">
+                            <label>City / Sector</label>
+                            <input type="text" id="input-city" class="form-control" required placeholder="Berlin">
+                        </div>
+
+                        <!-- Payment Protocol (PayPal Only) -->
+                        <h2 style="margin-top: 2rem;">Payment Protocol</h2>
+                        <div id="paypal-button-container" style="margin-top: 1rem; min-height: 150px;"></div>
+
+                    </form>
+                </div>
+
+                <!-- Right Column: Summary -->
+                <div class="order-summary">
+                    <h2>Mission Manifest</h2>
+                    <div id="checkout-items">
+                        <!-- Items injected via JS -->
+                    </div>
+                    <div class="summary-total">
+                        <div class="summary-row" style="margin:0">
+                            <span>Total</span>
+                            <span id="checkout-total">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="cart.js"></script>
+    <!-- PayPal SDK (Live Mode) -->
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=AQXeEUufucJNVbA4vJo1c5SaI61V2pNbiHrfG3bx3Ea1qUEb7LNsQ17-NiUNXKLhpHK9teWhmEcILDef&currency=EUR&components=buttons"></script>
+
+    <script type="module">
+        import { submitOrder } from './api.js';
+        import { sendOrderConfirmation } from './email-service.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Checkout Script: DOM Loaded");
+
+            try {
+                // 1. Initialize Cart & Summary
+                const itemsContainer = document.getElementById('checkout-items');
+                const totalEl = document.getElementById('checkout-total');
+                const cart = JSON.parse(localStorage.getItem('tss_cart_v1')) || [];
+
+                console.log("Cart Items Loaded:", cart.length);
+                const calculateTotal = () => cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+                const total = calculateTotal();
+                console.log("Total Calculated:", total);
+
+                if (cart.length === 0) {
+                    itemsContainer.innerHTML = '<p>No assets selected.</p>';
+                } else {
+                    cart.forEach(item => {
+                        const row = document.createElement('div');
+                        row.className = 'summary-row';
+                        row.innerHTML = `<span>${item.name} (x${item.qty})</span><span>${(item.price * item.qty).toFixed(2)} €</span>`;
+                        itemsContainer.appendChild(row);
+                    });
+                    totalEl.textContent = total.toFixed(2) + ' €';
+                }
+
+                // 2. Initialize PayPal
+                if (typeof paypal !== 'undefined') {
+                    console.log("Initializing PayPal Buttons...");
+                    paypal.Buttons({
+                        style: {
+                            layout: 'vertical',
+                            color: 'blue',
+                            shape: 'rect',
+                            label: 'paypal'
+                        },
+                        createOrder: function (data, actions) {
+                            return actions.order.create({
+                                purchase_units: [{
+                                    amount: { value: total.toFixed(2) },
+                                    description: 'TSS Equipment Acquisition'
+                                }]
+                            });
+                        },
+                        onApprove: function (data, actions) {
+                            return actions.order.capture().then(async function (details) {
+                                console.log('PayPal Transaction Completed:', details);
+
+                                const form = document.getElementById('checkout-form');
+                                const customerName = details && details.payer && details.payer.name ? (details.payer.name.given_name + ' ' + details.payer.name.surname) : 'Unknown Agent';
+                                const customerEmail = details && details.payer ? details.payer.email_address : '';
+
+                                // Address from PayPal (safe access)
+                                const shipping = details.purchase_units && details.purchase_units[0] ? details.purchase_units[0].shipping : null;
+                                const paypalAddress = shipping && shipping.address ? (shipping.address.address_line_1 + ', ' + shipping.address.admin_area_2) : '';
+                                const paypalCity = shipping && shipping.address ? shipping.address.admin_area_2 : '';
+
+                                // Use safe selection with IDs
+                                const getName = () => document.getElementById('input-name')?.value || customerName;
+                                const getEmail = () => document.getElementById('input-email')?.value || customerEmail;
+                                const getAddress = () => document.getElementById('input-address')?.value || paypalAddress || 'PayPal Address';
+                                const getCity = () => document.getElementById('input-city')?.value || paypalCity || 'PayPal City';
+
+                                const orderData = {
+                                    items: cart,
+                                    total: total,
+                                    customer: {
+                                        name: getName(),
+                                        email: getEmail(),
+                                        address: getAddress(),
+                                        city: getCity()
+                                    },
+                                    paymentMethod: 'paypal',
+                                    transactionId: details.id,
+                                    status: 'paid',
+                                    paypalPayerId: details.payer.payer_id
+                                };
+                                console.log("Order Data Payload:", orderData);
+
+                                try {
+                                    const orderId = await submitOrder(orderData);
+                                    console.log("Order stored in Firebase:", orderId);
+
+                                    // Send Email (Non-blocking)
+                                    try {
+                                        console.log("Attempting to send email...");
+                                        await sendOrderConfirmation({ ...orderData, id: orderId });
+                                        console.log('Email sent successfully');
+                                    } catch (emailErr) {
+                                        console.error("Email sending failed (non-critical):", emailErr);
+                                    }
+
+                                    // Store confirmation data & redirect
+                                    sessionStorage.setItem('tss_order_confirmed', JSON.stringify({
+                                        orderId: orderId,
+                                        items: cart,
+                                        total: total,
+                                        customerName: orderData.customer.name,
+                                        paymentMethod: 'PayPal',
+                                        transactionId: details.id
+                                    }));
+                                    localStorage.removeItem('tss_cart_v1');
+                                    console.log("Redirecting to confirmation page...");
+                                    window.location.href = 'order-confirmed.html';
+                                } catch (error) {
+                                    console.error('Firebase Submission Error after PayPal:', error);
+                                    if (error.toString().includes('Insufficient stock')) {
+                                        alert('MISSION ABORTED: ' + error + '\n\nYour payment has been authorized but not captured. Please contact support.');
+                                    } else {
+                                        alert(`Payment confirmed (${details.id}), but secure database transmission failed. Please contact support with your Transaction ID.`);
+                                    }
+                                }
+                            });
+                        },
+                        onError: function (err) {
+                            console.error('PayPal Error:', err);
+                            alert('PayPal Protocol Failed.');
+                        }
+                    }).render('#paypal-button-container');
+                } else {
+                    console.error("PayPal SDK not loaded or blocked.");
+                    document.getElementById('paypal-button-container').innerHTML = '<p style="color:red">Secure connection to payment gateway failed. Please disable blockers.</p>';
+                }
+
+            } catch (globalError) {
+                console.error("Checkout Script CRITICAL ERROR:", globalError);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

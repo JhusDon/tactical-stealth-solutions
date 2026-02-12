@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Confirmed | Tactical Stealth Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .confirmation-container {
+            max-width: 700px;
+            margin: 120px auto 60px;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .confirmation-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .confirmation-icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: drawCheck 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes drawCheck {
+            0% {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 100;
+            }
+
+            100% {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(0, 255, 136, 0.35);
+            }
+        }
+
+        .confirmation-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .confirmation-subtitle {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        .order-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: left;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .order-card-header h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .order-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #888;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            user-select: all;
+        }
+
+        .order-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+
+        .order-line.total {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+            padding-top: 15px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .order-line.total span:last-child {
+            color: var(--accent-color);
+        }
+
+        .order-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .meta-item label {
+            display: block;
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .meta-item span {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .next-steps {
+            background: rgba(0, 255, 136, 0.04);
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .next-steps h4 {
+            font-family: 'Oswald', sans-serif;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .next-steps li {
+            color: #aaa;
+            padding: 6px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .next-steps li::before {
+            content: '▹';
+            color: var(--accent-color);
+        }
+
+        .confirmation-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .confirmation-actions a {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: #0a0a0a;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ccc;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .no-order {
+            color: #888;
+            margin-top: 120px;
+        }
+
+        .no-order a {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">TSS<span style="color:var(--accent-color)">.</span></div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#products">Equipment</a></li>
+                    <li><a href="tracking.html">Tracking</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="confirmation-container" id="confirmation-content">
+        <!-- Content injected by JS -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('confirmation-content');
+            const raw = sessionStorage.getItem('tss_order_confirmed');
+
+            if (!raw) {
+                container.innerHTML = `
+                    <div class="no-order">
+                        <h2>No Active Mission Briefing</h2>
+                        <p>You have not placed an order yet. <a href="index.html#products">Browse Equipment</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            const order = JSON.parse(raw);
+            // Clear after display so refresh doesn't re-show
+            // sessionStorage.removeItem('tss_order_confirmed'); // Keep for refresh
+
+            // Build items HTML
+            let itemsHTML = '';
+            if (order.items && order.items.length > 0) {
+                order.items.forEach(item => {
+                    itemsHTML += `
+                        <div class="order-line">
+                            <span>${item.name} × ${item.qty}</span>
+                            <span>${(item.price * item.qty).toFixed(2)} €</span>
+                        </div>
+                    `;
+                });
+            } else {
+                itemsHTML = '<div class="order-line"><span>Equipment Package</span><span>—</span></div>';
+            }
+
+            container.innerHTML = `
+                <div class="confirmation-icon">
+                    <svg viewBox="0 0 50 50">
+                        <polyline points="14,27 22,35 36,18" />
+                    </svg>
+                </div>
+
+                <h1 class="confirmation-title">Mission Accepted</h1>
+                <p class="confirmation-subtitle">Your acquisition has been encrypted & transmitted.</p>
+
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <h3>Order Manifest</h3>
+                        <span class="order-id">${order.orderId}</span>
+                    </div>
+
+                    ${itemsHTML}
+
+                    <div class="order-line total">
+                        <span>Total Allocated</span>
+                        <span>${order.total.toFixed(2)} €</span>
+                    </div>
+
+                    <div class="order-meta">
+                        <div class="meta-item">
+                            <label>Operative</label>
+                            <span>${order.customerName || 'Classified'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <label>Payment Vector</label>
+                            <span>${order.paymentMethod || 'Secure'}</span>
+                        </div>
+                        ${order.transactionId ? `
+                        <div class="meta-item">
+                            <label>Transaction ID</label>
+                            <span style="font-family: 'Courier New', monospace; font-size: 0.8rem;">${order.transactionId}</span>
+                        </div>
+                        ` : ''}
+                        <div class="meta-item">
+                            <label>Status</label>
+                            <span style="color: var(--accent-color);">● Processing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="next-steps">
+                    <h4>Next Steps</h4>
+                    <ul>
+                        <li>A confirmation signal has been sent to your secure comms channel (email).</li>
+                        <li>Your equipment will be prepared within 1-3 business days.</li>
+                        <li>You will receive a dispatch signal with tracking coordinates once shipped.</li>
+                        <li>Use your Reference ID to track your order: <a href="tracking.html" style="color:var(--accent-color)">${order.orderId.slice(0, 8)}...</a></li>
+                    </ul>
+                </div>
+
+                <div class="confirmation-actions">
+                    <a href="tracking.html" class="btn-ghost">Track Order</a>
+                    <a href="index.html" class="btn-primary">Return to Base</a>
+                </div>
+            `;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | TSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Security Gate (Unchanged) -->
+    <div id="admin-gate">
+        <div class="gate-content">
+            <h2>Restricted Access</h2>
+            <p style="color:red; font-family:'Courier New'">// ADMIN CLEARANCE REQUIRED</p>
+            <input type="password" id="admin-code" placeholder="ENTER CODE">
+            <button onclick="unlockAdmin()">Authenticate</button>
+        </div>
+    </div>
+
+    <!-- Main Admin Interface (Initially Hidden) -->
+    <div id="admin-interface" class="admin-body" style="display:none;">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">TSS<span style="color:var(--accent-color)">.</span> ADMIN</div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-item active" onclick="switchView('dashboard', this)">
+                    📊 Dashboard
+                </a>
+                <a href="#" class="sidebar-item" onclick="switchView('orders', this)">
+                    📦 Orders
+                </a>
+                <a href="#" class="sidebar-item" onclick="switchView('inventory', this)">
+                    🏷️ Inventory
+                </a>
+                <a href="#" class="sidebar-item" onclick="alert('Module under construction by Ops.')">
+                    👥 Customers
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="sidebar-item" style="color:var(--error-color);">
+                    🔒 Secure Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="admin-main">
+
+            <header class="admin-header">
+                <h1 id="page-title" class="admin-title">Dashboard</h1>
+                <div style="font-family:'Courier New'; color:#666; font-size:0.8rem;">
+                    SECURE_CX: <span id="connection-status" style="color:var(--accent-color)">ENCRYPTED</span>
+                </div>
+            </header>
+
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="admin-view">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Revenue</div>
+                        <div class="kpi-value" id="kpi-revenue">0.00 €</div>
+                        <div class="mt-2 text-green">↑ 0% vs last week</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Orders</div>
+                        <div class="kpi-value" id="kpi-orders">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Pending Dispatch</div>
+                        <div class="kpi-value" id="kpi-pending" style="color:#ff9d00">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Active Visitors</div>
+                        <div class="kpi-value">1</div>
+                        <div class="mt-2" style="color:#666; font-size:0.8rem">Live Count</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom:1rem; color:#888;">Recent Activity</h3>
+                <div class="inventory-table-container">
+                    <!-- Reusing inventory logic for a clean list -->
+                    <div style="padding:15px; text-align:center; color:#666;">
+                        System monitoring active.
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ORDERS -->
+            <div id="view-orders" class="admin-view" style="display:none;">
+                <div style="margin-bottom:1rem; display:flex; gap:10px;">
+                    <button class="action-btn" onclick="renderFilteredData('all')">All</button>
+                    <button class="action-btn" onclick="renderFilteredData('pending')">Pending</button>
+                    <button class="action-btn" onclick="renderFilteredData('shipped')">Shipped</button>
+                </div>
+                <div class="inventory-table-container">
+                    <div class="inventory-header inventory-row"
+                        style="grid-template-columns: 100px 100px 1fr 100px 1fr 100px;">
+                        <div>Date</div>
+                        <div>ID</div>
+                        <div>Customer</div>
+                        <div>Total</div>
+                        <div>Status</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="orders-list-container">
+                        <!-- JS Injected -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: INVENTORY -->
+            <div id="view-inventory" class="admin-view" style="display:none;">
+                <div class="inventory-table-container">
+                    <div class="inventory-header inventory-row">
+                        <div>Img</div>
+                        <div>Product Name</div>
+                        <div>SKU (ID)</div>
+                        <div>Price</div>
+                        <div>Stock</div>
+                        <div>Edit</div>
+                    </div>
+                    <div id="inventory-list-container">
+                        <!-- JS Injected -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { sendShippingConfirmation } from "./email-service.js";
+
+        // Global State
+        window.ALL_ORDERS = [];
+        window.PRODUCTS = [
+            { id: 'ghost_cap', name: 'Ghost-Cap 4K Pro', img: 'assets/processed/product_cap_tactical.png' },
+            { id: 'audio_ext', name: 'Stealth Audio Ext.', img: 'assets/processed/product_audio_tactical.png' },
+            { id: 'ghost_bundle', name: 'Ghost Bundle', img: 'assets/bundle_main.jpg' } // Placeholder img
+        ];
+
+        // --- AUTH LOGIC ---
+        window.unlockAdmin = () => {
+            const code = document.getElementById('admin-code').value.trim();
+            const valid = ['TSS2024', 'GHOST-77', 'ADMIN-001'];
+
+            if (valid.includes(code)) {
+                document.getElementById('admin-gate').style.display = 'none';
+                document.getElementById('admin-interface').style.display = 'flex'; // Show Flex container
+                initDashboard();
+            } else {
+                alert('ACCESS DENIED.');
+            }
+        };
+
+        // --- ROUTING ---
+        window.switchView = (viewName, navEl) => {
+            // Updated Nav
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            if (navEl) navEl.classList.add('active');
+
+            // Update Titles
+            const titles = {
+                'dashboard': 'Dashboard',
+                'orders': 'Order Management',
+                'inventory': 'Supply Depot'
+            };
+            document.getElementById('page-title').textContent = titles[viewName];
+
+            // Toggle Views
+            document.querySelectorAll('.admin-view').forEach(el => el.style.display = 'none');
+            document.getElementById(`view-${viewName}`).style.display = 'block';
+        };
+
+        // --- CORE FUNCTIONS ---
+        function initDashboard() {
+            // Load Orders live
+            const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                window.ALL_ORDERS = [];
+                let revenue = 0;
+                let pending = 0;
+
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    window.ALL_ORDERS.push({ id: docSnap.id, ...d });
+                    // KPI Calcs
+                    if (d.status !== 'cancelled') revenue += (d.total || 0);
+                    if (d.status === 'pending' || d.status === 'paid') pending++;
+                });
+
+                // Update KPIs
+                document.getElementById('kpi-revenue').textContent = revenue.toFixed(2) + ' €';
+                document.getElementById('kpi-orders').textContent = window.ALL_ORDERS.length;
+                document.getElementById('kpi-pending').textContent = pending;
+
+                renderOrdersList(); // Refresh order view if active
+            });
+
+            // Load Inventory
+            renderInventoryList();
+        }
+
+        // --- RENDERERS ---
+
+        // 1. ORDERS
+        function renderOrdersList() {
+            const container = document.getElementById('orders-list-container');
+            container.innerHTML = '';
+
+            window.ALL_ORDERS.forEach(order => {
+                const row = document.createElement('div');
+                row.className = 'inventory-row'; // Reuse grid style
+                row.style.gridTemplateColumns = '100px 100px 1fr 100px 1fr 100px';
+                row.style.background = '#111';
+                row.style.borderBottom = '1px solid #222';
+
+                const dateStr = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : 'N/A';
+                const statusColor = order.status === 'shipped' ? '#009dff' : (order.status === 'pending' || order.status === 'paid' ? '#ff9d00' : '#888');
+
+                row.innerHTML = `
+                    <div style="font-size:0.85rem; color:#666">${dateStr}</div>
+                    <div style="font-family:'Courier New'; font-size:0.85rem">#${order.id.slice(0, 6)}</div>
+                    <div>
+                        <div style="color:#e0e0e0; font-weight:bold">${order.customer?.name || 'Unknown'}</div>
+                        <div style="font-size:0.8rem; color:#666">${order.customer?.email || ''}</div>
+                    </div>
+                    <div style="color:var(--accent-color)">${(order.total || 0).toFixed(2)} €</div>
+                    <div><span style="border:1px solid ${statusColor}; color:${statusColor}; padding:2px 6px; border-radius:4px; font-size:0.7rem; text-transform:uppercase;">${order.status}</span></div>
+                    <div>
+                        ${order.status !== 'shipped' ?
+                        `<button class="action-btn" style="font-size:0.7rem" onclick="window.markShipped('${order.id}')">Fulfill</button>` :
+                        '<span style="font-size:1.2rem; color:#009dff;">✓</span>'}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // 2. INVENTORY
+        function renderInventoryList() {
+            const container = document.getElementById('inventory-list-container');
+            container.innerHTML = '';
+
+            window.PRODUCTS.forEach(prod => {
+                const row = document.createElement('div');
+                row.className = 'inventory-row';
+
+                row.innerHTML = `
+                    <img src="${prod.img}" class="inventory-img-thumb" alt="Product">
+                    <div style="font-weight:600">${prod.name}</div>
+                    <div style="font-family:'Courier New'; color:#666; font-size:0.8rem">${prod.id}</div>
+                    <div id="price-${prod.id}" style="color:var(--accent-color)">--</div>
+                    <div>
+                        <input type="number" id="input-${prod.id}" class="stock-input" placeholder="0">
+                        <div style="text-align:center; font-size:0.7rem; color:#666; margin-top:4px;">Current: <span id="current-${prod.id}">--</span></div>
+                    </div>
+                     <div style="text-align:right;">
+                        <button class="action-btn" onclick="window.updateStock('${prod.id}')">Save</button>
+                    </div>
+                `;
+                container.appendChild(row);
+
+                // Live Listener for each product
+                onSnapshot(doc(db, "inventory", prod.id), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById(`current-${prod.id}`).textContent = data.qty || 0;
+                        document.getElementById(`input-${prod.id}`).placeholder = data.qty || 0;
+                        document.getElementById(`price-${prod.id}`).textContent = (data.price || 0.00).toFixed(2) + ' €';
+                    }
+                });
+            });
+        }
+
+        // --- ACTIONS ---
+        window.markShipped = async (id) => {
+            const tracking = prompt('Enter Secure Tracking Number:');
+            if (tracking) {
+                try {
+                    await updateDoc(doc(db, "orders", id), {
+                        status: "shipped",
+                        trackingNumber: tracking
+                    });
+                    // Email
+                    const snap = await getDoc(doc(db, "orders", id));
+                    // Check if snap exists to avoid error
+                    if (snap.exists()) {
+                        sendShippingConfirmation({ id: snap.id, ...snap.data() });
+                    }
+                    alert('Order Fulfilled.');
+                } catch (e) { alert(e.message); }
+            }
+        };
+
+        window.updateStock = async (prodId) => {
+            const input = document.getElementById(`input-${prodId}`);
+            const val = parseInt(input.value);
+            if (!isNaN(val)) {
+                try {
+                    await updateDoc(doc(db, "inventory", prodId), {
+                        qty: val // Set absolute value
+                    });
+                    input.value = '';
+                    alert('Stock Updated');
+                } catch (e) { alert(e.message); }
+            }
+        };
+
+        // Export global filter if needed (mock for now)
+        window.renderFilteredData = (filter) => {
+            // Simple filter logic could be added here
+            // For now just re-render all
+            alert('Filter ' + filter + ' active.');
+        };
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Stealth Solutions | Invisible Surveillance</title>
+    <meta name="description" content="TSS offers high-end, invisible surveillance gear including the Ghost-Cap 4K Pro.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">TSS<span style="color:var(--accent-color)">.</span></div>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="#products" class="nav-link">Equipment</a></li>
+                    <li><a href="#technology" class="nav-link">Technology</a></li>
+                    <li><a href="#mission" class="nav-link">Mission</a></li>
+                    <li><a href="manual.html" class="nav-link">Manual</a></li>
+                    <li><a href="#contact" class="nav-link" style="color:var(--accent-color)">Secure Channel</a></li>
+                    <!-- Cart Trigger -->
+                    <li class="cart-trigger">
+                        <span>CRATE</span>
+                        <div class="cart-count">0</div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Cart Overlay & Sidebar -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h2>Supply Crate</h2>
+            <button class="close-cart">×</button>
+        </div>
+        <div id="cart-items-container" class="cart-content">
+            <!-- Items injected by JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span id="cart-total">0.00 €</span>
+            </div>
+            <button id="btn-shopify-checkout" class="checkout-btn">Proceed to Drop</button>
+        </div>
+    </div>
+
+    <!-- Access Gate Overlay -->
+    <div id="access-gate" class="access-gate">
+        <div class="gate-content">
+            <div class="logo-large">TSS<span style="color:var(--accent-color)">.</span></div>
+            <h2>Restricted Access</h2>
+            <p>Enter Protocol Code to proceed.</p>
+            <div class="input-group">
+                <input type="password" id="access-code" placeholder="ENTER CODE" autofocus>
+                <button id="access-btn" class="btn btn-primary">Decrypt</button>
+            </div>
+            <p id="error-msg" class="error-msg hidden">Access Denied.</p>
+            <div class="gate-footer">
+                <p>Not a member? <a href="#" class="text-link">Request Vetting</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden by default) -->
+    <main id="main-content" class="blur-content">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Invisible <br><span style="color:var(--accent-color)">Surveillance</span>.</h1>
+                    <p>The "Ghost-Cap 4K Pro". Engineered for absolute discretion. Vantablack optics. 4K precision.</p>
+                    <a href="#products" class="btn btn-primary">View Equipment</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Section -->
+        <section id="products">
+            <div class="container">
+                <h2 class="section-title">Tactical Gear</h2>
+                <div class="product-grid">
+                    <!-- Product 1: Ghost-Cap -->
+                    <div class="product-card">
+                        <div class="card-visual">
+                            <img src="assets/processed/product_cap_tactical.png" alt="Ghost Cap Tactical"
+                                class="product-img">
+                        </div>
+                        <div class="card-content">
+                            <h3>Ghost-Cap 4K Pro</h3>
+                            <p class="specs">Vantablack Lens | 4K Text-Focus | 3h Battery</p>
+                            <p class="price">550,00 €</p>
+                            <a href="product-cap.html" class="btn">Inspect</a>
+                        </div>
+                    </div>
+
+                    <!-- Product 2: Audio Extension -->
+                    <div class="product-card">
+                        <div class="card-visual">
+                            <img src="assets/processed/product_audio_tactical.png" alt="Stealth Audio"
+                                class="product-img">
+                        </div>
+                        <div class="card-content">
+                            <h3>Stealth Audio Extension</h3>
+                            <p class="specs">A808 Micro-Earpiece | Inductive Loop | Hollow-Shell</p>
+                            <p class="price">149,00 €</p>
+                            <a href="product-audio.html" class="btn">Inspect</a>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+
+        <!-- USPs Section -->
+        <section id="technology">
+            <div class="container">
+                <h2 class="section-title">Core Technology</h2>
+                <div class="usp-grid">
+                    <div class="usp-item">
+                        <h4>4K Optical Matrix</h4>
+                        <p>Manual focus adjustment allows for crystal-clear capture of screens and documents. Hides
+                            effortlessly in clothing or buttons.</p>
+                    </div>
+                    <div class="usp-item">
+                        <h4>Dual-Mode Transmission</h4>
+                        <p><strong>Local:</strong> Direct Wi-Fi P2P connection for zero-latency
+                            monitoring.<br><strong>Remote:</strong> Global live-streaming via 4G/LTE Router integration.
+                        </p>
+                    </div>
+                    <div class="usp-item">
+                        <h4>Inductive Audio Loop</h4>
+                        <p>The "Vip Pro" conical earpieces sit deep in the canal, receiving invisible audio signals from
+                            the neck-loop. 4+ hours autonomy.</p>
+                    </div>
+                    <div class="usp-item">
+                        <h4>Global Connectivity</h4>
+                        <p>Includes a portable 150Mbps 4G LTE Router (3000mAh). Creates a secure 2.4GHz network
+                            anywhere, supporting up to 10 devices.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Mission / Target Audience -->
+            <section id="mission">
+                <div class="container">
+                    <h2 class="section-title">Operational Scope</h2>
+                    <div class="mission-grid">
+                        <div class="mission-card">
+                            <h3>Investigative Journalism</h3>
+                            <p>Document corruption and illicit activities without alerting targets. Our gear allows for
+                                close-range evidence gathering in hostile environments.</p>
+                        </div>
+                        <div class="mission-card">
+                            <h3>Private Investigation</h3>
+                            <p>Discreetly monitor subjects in public spaces. The "Ghost-Cap" blends seamlessly into
+                                urban crowds, providing unshakeable cover.</p>
+                        </div>
+                        <div class="mission-card">
+                            <h3>Examination Surveillance</h3>
+                            <p>High-resolution text capture and invisible two-way communication. Ideal for academic
+                                integrity testing and secure information retrieval.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sales / Vetting Section -->
+            <section id="contact" class="contact-section">
+                <div class="container">
+                    <h2 class="section-title">Secure Acquisition</h2>
+                    <div class="access-box">
+                        <p>We do not sell to the public. Purchases are vetted.</p>
+                        <p>Contact our encrypted channel for stock availability.</p>
+                        <div class="secure-links">
+                            <a href="https://t.me/+nS2-lsvKTHtlYTEy" target="_blank" class="btn btn-primary">Telegram
+                                Node</a>
+                        </div>
+                        <p class="disclaimer">By proceeding, you acknowledge that this equipment is for legal use only
+                            (Journalism, Security, Private Investigation).</p>
+                    </div>
+                </div>
+            </section>
+
+    </main>
+
+    <script src="cart.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

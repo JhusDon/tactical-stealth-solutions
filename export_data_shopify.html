@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopify Data Exporter</title>
+</head>
+<body>
+    <h1>Exporting Data...</h1>
+    <div id="status">Initializing...</div>
+
+    <h2>Products CSV</h2>
+    <textarea id="csv-products" style="width:100%; height:200px; display:none;"></textarea>
+
+    <h2>Orders CSV</h2>
+    <textarea id="csv-orders" style="width:100%; height:200px; display:none;"></textarea>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Shopify Product CSV Header
+        const PRODUCT_HEADER = [
+            'Handle', 'Title', 'Body (HTML)', 'Vendor', 'Type', 'Tags', 'Published', 'Option1 Name', 'Option1 Value', 'Variant SKU', 'Variant Grams', 'Variant Inventory Tracker', 'Variant Inventory Qty', 'Variant Price', 'Image Src'
+        ];
+
+        // Legacy Order CSV Header
+        const ORDER_HEADER = [
+            'Order ID', 'Date', 'Customer Name', 'Customer Email', 'Address', 'Items', 'Total', 'Status', 'Tracking'
+        ];
+
+        async function exportData() {
+            try {
+                document.getElementById('status').textContent = 'Fetching Products...';
+                
+                // --- 1. PRODUCTS ---
+                // Since products are hardcoded in JS (except stock), we will use the hardcoded list 
+                // combined with live stock from 'inventory' collection.
+                const products = [
+                    { id: 'ghost_cap', title: 'Ghost-Cap 4K Pro', handle: 'ghost-cap-4k-pro', price: 59.99, sku: 'GHOST-77', img: 'https://tactical-stealth.web.app/assets/processed/product_cap_tactical.png' },
+                    { id: 'audio_ext', title: 'Stealth Audio Ext.', handle: 'stealth-audio-ext', price: 19.99, sku: 'AUDIO-01', img: 'https://tactical-stealth.web.app/assets/processed/product_audio_tactical.png' },
+                    { id: 'ghost_bundle', title: 'Ghost Bundle', handle: 'ghost-bundle', price: 75.00, sku: 'BUNDLE-01', img: 'https://tactical-stealth.web.app/assets/bundle_main.jpg' }
+                ];
+
+                const invSnap = await getDocs(collection(db, "inventory"));
+                const inventory = {};
+                invSnap.forEach(doc => inventory[doc.id] = doc.data().qty || 0);
+
+                let productCsv = PRODUCT_HEADER.join(',') + '\n';
+
+                products.forEach(p => {
+                    const stock = inventory[p.id] || 0;
+                    const row = [
+                        p.handle,
+                        p.title,
+                        `<strong>${p.title}</strong> - Professional Grade.`, // Placeholder Body
+                        'TSS', // Vendor
+                        'Tactical Gear', // Type
+                        'surveillance, wearable', // Tags
+                        'TRUE', // Published
+                        'Title', // Option1 Name
+                        'Default Title', // Option1 Value
+                        p.sku,
+                        '200', // Grams
+                        'shopify', // Tracker
+                        stock, // Qty
+                        p.price,
+                        p.img
+                    ];
+                    // Escape commas
+                    const safeRow = row.map(field => {
+                        const str = String(field);
+                        return str.includes(',') ? `"${str}"` : str;
+                    }).join(',');
+                    productCsv += safeRow + '\n';
+                });
+
+                document.getElementById('csv-products').value = productCsv;
+                document.getElementById('csv-products').style.display = 'block';
+
+                // --- 2. ORDERS ---
+                document.getElementById('status').textContent = 'Fetching Orders...';
+                const orderSnap = await getDocs(collection(db, "orders"));
+                let orderCsv = ORDER_HEADER.join(',') + '\n';
+
+                orderSnap.forEach(doc => {
+                    const d = doc.data();
+                    const date = d.timestamp ? new Date(d.timestamp.toDate()).toISOString() : '';
+                    const items = Array.isArray(d.items) ? d.items.map(i => `${i.qty}x ${i.name}`).join('; ') : '';
+                    
+                    const row = [
+                        doc.id,
+                        date,
+                        d.customer?.name || '',
+                        d.customer?.email || '',
+                        (d.customer?.address || '') + ' ' + (d.customer?.city || ''),
+                        items,
+                        d.total || 0,
+                        d.status || 'pending',
+                        d.trackingNumber || ''
+                    ];
+
+                    const safeRow = row.map(field => {
+                        const str = String(field).replace(/"/g, '""'); // Escape quotes
+                        return `"${str}"`; // Quote all fields for safety
+                    }).join(',');
+                    orderCsv += safeRow + '\n';
+                });
+
+                document.getElementById('csv-orders').value = orderCsv;
+                document.getElementById('csv-orders').style.display = 'block';
+
+                document.getElementById('status').textContent = 'DONE';
+
+            } catch(e) {
+                document.getElementById('status').textContent = 'ERROR: ' + e.message;
+                console.error(e);
+            }
+        }
+
+        exportData();
+    </script>
+</body>
+</html>

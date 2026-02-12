@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | TSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent-color: #00ff9d;
+            --glass-bg: rgba(20, 20, 20, 0.8);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --spacing-md: 2rem;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Access Gate */
+        #admin-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .gate-content {
+            text-align: center;
+            padding: 2rem;
+            border: var(--glass-border);
+            background: rgba(10, 10, 10, 0.9);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: #111;
+            border: 1px solid #333;
+            color: var(--accent-color);
+            font-family: 'Oswald', sans-serif;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Dashboard */
+        #dashboard {
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #111;
+            border: var(--glass-border);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #111;
+            border: var(--glass-border);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #222;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-paid {
+            background: rgba(0, 255, 157, 0.1);
+            color: #00ff9d;
+        }
+
+        .status-shipped {
+            background: rgba(0, 157, 255, 0.1);
+            color: #009dff;
+        }
+
+        .status-pending {
+            background: rgba(255, 157, 0, 0.1);
+            color: #ff9d00;
+        }
+
+        .action-btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Security Gate -->
+    <div id="admin-gate">
+        <div class="gate-content">
+            <h2>Restricted Access</h2>
+            <p style="color:red; font-family:'Courier New'">// ADMIN CLEARANCE REQUIRED</p>
+            <input type="password" id="admin-code" placeholder="ENTER CODE">
+            <button onclick="unlockAdmin()">Authenticate</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="container">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <h1>Command Center</h1>
+            <a href="index.html" style="color:var(--text-secondary); text-decoration:none;">Logout</a>
+        </header>
+
+        <div style="margin-bottom:1rem; display:flex; gap:10px;">
+            <button class="action-btn" onclick="window.filterRevenue('today')" id="filter-today">Today</button>
+            <button class="action-btn" onclick="window.filterRevenue('week')" id="filter-week">This Week</button>
+            <button class="action-btn" onclick="window.filterRevenue('month')" id="filter-month">This Month</button>
+            <button class="action-btn" onclick="window.filterRevenue('all')" id="filter-all"
+                style="border-color:var(--accent-color)">All Time</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" id="total-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Revenue</div>
+                <div class="stat-value" id="total-revenue">0.00 €</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Dispatch</div>
+                <div class="stat-value" id="pending-dispatch">0</div>
+            </div>
+        </div>
+
+        <h2>Supply Depot (Inventory)</h2>
+        <div class="stats-grid" id="inventory-grid">
+            <!-- Injected via JS -->
+            <div class="stat-card">Loading Assets...</div>
+        </div>
+
+        <h2>Incoming Transmissions</h2>
+        <div style="overflow-x:auto;">
+            <table id="orders-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Order Ref</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Tracking</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Injected via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { sendShippingConfirmation } from "./email-service.js";
+
+        // Gate Logic
+        window.unlockAdmin = () => {
+            const input = document.getElementById('admin-code');
+            const code = input.value.trim();
+            const valid = ['TSS2024', 'GHOST-77', 'ADMIN-001'];
+
+            if (valid.includes(code)) {
+                document.getElementById('admin-gate').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadOrders();
+                window.loadInventory();
+            } else {
+                alert('ACCESS DENIED. INCIDENT LOGGED.');
+                input.value = '';
+                input.focus();
+            }
+        };
+
+        // Date Formatter
+        window.formatDate = (ts) => {
+            if (!ts) return 'Unknown';
+            const date = ts.toDate ? ts.toDate() : new Date(ts);
+            return date.toLocaleString('de-DE', {
+                day: '2-digit', month: '2-digit', year: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        };
+
+        // Load Orders Live
+        function loadOrders() {
+            const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+
+            onSnapshot(q, (snapshot) => {
+                ALL_ORDERS = [];
+                snapshot.forEach(docSnap => {
+                    ALL_ORDERS.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderFilteredData();
+            });
+        }
+
+        // ... (filterRevenue remain the same) ...
+
+        function renderFilteredData() {
+            const tbody = document.querySelector('#orders-table tbody');
+            tbody.innerHTML = '';
+            // ... (counters remain the same) ...
+
+            // Update Table Headers (You might need to update HTML manually if replacing only JS, 
+            // but here we inject rows. Ideally I should update the <thead> too via JS or separate edit)
+            // Let's assume I will update <thead> in a separate edit or just implicit knowledge that visual improvement
+
+            ALL_ORDERS.forEach(data => {
+                // ... (Filter Logic remains same) ...
+
+                if (include) {
+                    count++;
+                    revenue += (data.total || 0);
+
+                    const tr = document.createElement('tr');
+                    // Items Summary
+                    const itemsSummary = Array.isArray(data.items)
+                        ? data.items.map(i => `${i.qty}x ${i.name}`).join('<br>')
+                        : 'No items';
+
+                    // Customer info (Enhanced)
+                    const customer = data.customer || {};
+                    const customerDetails = `
+                        <div style="font-weight:bold; color:#fff">${customer.name || 'Unknown'}</div>
+                        <div style="font-size:0.85rem; color:#aaa; margin-top:4px;">
+                            ${customer.address || 'No Address'}<br>
+                            ${customer.city || 'No City'}
+                        </div>
+                        <a href="mailto:${customer.email}" style="color:var(--accent-color); font-size:0.8rem; text-decoration:none; display:block; margin-top:4px;">
+                            ✉ ${customer.email || 'No Email'}
+                        </a>
+                    `;
+
+                    tr.innerHTML = `
+                        <td style="font-size:0.85rem; color:#888;">${formatDate(data.timestamp)}</td>
+                        <td style="font-family:'Courier New'">${data.id.substring(0, 8)}...</td>
+                        <td>${customerDetails}</td>
+                        <td style="font-size:0.9rem">${itemsSummary}</td>
+                        <td style="color:var(--accent-color); font-weight:bold">${(data.total || 0).toFixed(2)} €</td>
+                        <td><span class="status-badge status-${data.status || 'pending'}">${data.status || 'pending'}</span></td>
+                        <td style="font-family:'Courier New'; font-size:0.85rem">${data.trackingNumber || '-'}</td>
+                        <td>
+                            ${data.status !== 'shipped' ?
+                            `<button class="action-btn" onclick="window.markShipped('${data.id}')">Dispatch</button>` :
+                            '<span style="color:#666">Archived</span>'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+                // ... (pending logic) ...
+            });
+            // ... (stats update) ...
+        }
+
+        // Global function for buttons
+        window.markShipped = async (id) => {
+            const tracking = prompt('Enter Secure Tracking Number (or leave empty):');
+            if (tracking !== null) {
+                try {
+                    const orderRef = doc(db, "orders", id);
+
+                    // Update Status
+                    await updateDoc(orderRef, {
+                        status: "shipped",
+                        trackingNumber: tracking || 'CLASSIFIED'
+                    });
+
+                    // Fetch updated order data for email
+                    const docSnap = await getDoc(orderRef);
+                    const orderData = { id: docSnap.id, ...docSnap.data() };
+
+                    // Send Email
+                    await sendShippingConfirmation(orderData);
+
+                    alert("Status updated & Notification sent.");
+
+                } catch (e) {
+                    alert('Error updating status: ' + e.message);
+                }
+            }
+        };
+
+        // Inventory Logic
+        const PRODUCTS = [
+            { id: 'ghost_cap', name: 'Ghost-Cap 4K Pro' },
+            { id: 'audio_ext', name: 'Stealth Audio Ext.' },
+            { id: 'ghost_bundle', name: 'Ghost Bundle' }
+        ];
+
+        window.loadInventory = async () => {
+            const { setDoc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+
+            const grid = document.getElementById('inventory-grid');
+            grid.innerHTML = '';
+
+            PRODUCTS.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="stat-label">${prod.name}</div>
+                    
+                    <!-- Stock Control -->
+                    <div style="margin: 10px 0;">
+                        <span style="color:#888; font-size:0.8rem">STOCK</span>
+                        <div class="stat-value" id="stock-${prod.id}" style="font-size:1.5rem">--</div>
+                        <div style="display:flex; gap:5px; justify-content:center; margin-top:5px;">
+                            <input type="number" id="input-${prod.id}" placeholder="+ / -" style="width:60px; padding:5px; background:#222; border:1px solid #444; color:#fff; text-align:center;">
+                            <button class="action-btn" onclick="window.updateStock('${prod.id}')">Adj.</button>
+                        </div>
+                    </div>
+
+                    <!-- Price Control -->
+                    <div style="margin: 10px 0; border-top:1px solid #333; padding-top:10px;">
+                        <span style="color:#888; font-size:0.8rem">PRICE (€)</span>
+                        <div style="display:flex; gap:5px; justify-content:center; margin-top:5px;">
+                            <input type="number" id="price-${prod.id}" step="0.01" placeholder="0.00" style="width:80px; padding:5px; background:#222; border:1px solid #444; color:var(--accent-color); text-align:center; font-weight:bold;">
+                            <button class="action-btn" onclick="window.updatePrice('${prod.id}')">Set</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+
+                // Fetch live data
+                onSnapshot(doc(db, "inventory", prod.id), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById(`stock-${prod.id}`).textContent = data.qty || 0;
+
+                        // Only update input if not focused (to avoid annoying user while typing)
+                        const priceInput = document.getElementById(`price-${prod.id}`);
+                        if (document.activeElement !== priceInput) {
+                            priceInput.value = (data.price || 0).toFixed(2);
+                        }
+                    } else {
+                        document.getElementById(`stock-${prod.id}`).textContent = '0';
+                        document.getElementById(`price-${prod.id}`).value = '0.00';
+                    }
+                });
+            });
+        };
+
+        window.updateStock = async (prodId) => {
+            const input = document.getElementById(`input-${prodId}`);
+            const qtyToAdd = parseInt(input.value);
+            if (!qtyToAdd || isNaN(qtyToAdd)) return;
+
+            try {
+                const { setDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await setDoc(doc(db, "inventory", prodId), {
+                    qty: increment(qtyToAdd),
+                    name: prodId // Ensure doc exists
+                }, { merge: true });
+
+                input.value = '';
+                flashSuccess(input.nextElementSibling);
+            } catch (e) {
+                console.error(e);
+                alert('Stock update failed');
+            }
+        };
+
+        window.updatePrice = async (prodId) => {
+            const input = document.getElementById(`price-${prodId}`);
+            const newPrice = parseFloat(input.value);
+            if (isNaN(newPrice) || newPrice < 0) return;
+
+            try {
+                const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await setDoc(doc(db, "inventory", prodId), {
+                    price: newPrice,
+                    name: prodId
+                }, { merge: true });
+
+                flashSuccess(input.nextElementSibling);
+            } catch (e) {
+                console.error(e);
+                alert('Price update failed');
+            }
+        };
+
+        function flashSuccess(btn) {
+            const originalText = btn.textContent;
+            btn.textContent = '✓';
+            btn.style.color = 'var(--accent-color)';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.color = '';
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

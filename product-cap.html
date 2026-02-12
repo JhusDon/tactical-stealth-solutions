@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost-Cap 4K Pro | Tactical Stealth Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">TSS<span style="color:var(--accent-color)">.</span></div>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="index.html#products" class="nav-link">Equipment</a></li>
+                    <li><a href="manual.html" class="nav-link">Manual</a></li>
+                    <li><a href="index.html#contact" class="nav-link" style="color:var(--accent-color)">Secure
+                            Channel</a></li>
+                    <!-- Cart Trigger -->
+                    <li class="cart-trigger">
+                        <span>CRATE</span>
+                        <div class="cart-count">0</div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Cart Overlay & Sidebar -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h2>Supply Crate</h2>
+            <button class="close-cart">×</button>
+        </div>
+        <div id="cart-items-container" class="cart-content"></div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span id="cart-total">0.00 €</span>
+            </div>
+            <button id="btn-shopify-checkout" class="checkout-btn">Proceed to Drop</button>
+        </div>
+    </div>
+
+    <!-- Access Gate Overlay (Reused for consistent security) -->
+    <div id="access-gate" class="access-gate">
+        <div class="gate-content">
+            <div class="logo-large">TSS<span style="color:var(--accent-color)">.</span></div>
+            <h2>Restricted Access</h2>
+            <p>Authentication Required.</p>
+            <div class="input-group">
+                <input type="password" id="access-code" placeholder="ENTER CODE">
+                <button id="access-btn" class="btn btn-primary">Decrypt</button>
+            </div>
+            <p id="error-msg" class="error-msg hidden">Access Denied.</p>
+        </div>
+    </div>
+
+    <main id="main-content" class="blur-content">
+        <div class="container">
+            <div class="product-hero">
+                <div class="product-gallery">
+                    <img src="assets/processed/product_cap_tactical.png" alt="Ghost-Cap 4K Pro"
+                        class="product-detail-img">
+                    <img src="assets/processed/product_cap_inside_final.png" alt="Ghost-Cap 4K Pro (Interior)"
+                        class="product-detail-img" style="margin-top: 20px;">
+                </div>
+
+                <div class="product-details">
+                    <a href="index.html#products" class="back-link">← Return to Portfolio</a>
+                    <h1 class="product-title">Ghost-Cap 4K Pro</h1>
+                    <p class="product-price">1,00 €</p>
+
+                    <p>The "Ghost-Cap 4K Pro" is the gold standard for covert surveillance. Engineered with a
+                        proprietary Vantablack optical coating, the lens is virtually invisible to the naked eye, even
+                        under direct sunlight.</p>
+                    <br>
+                    <p>Featuring a calculated lens recess and 4K resolution specifically tuned for high-contrast text
+                        capture, this unit allows operatives to document sensitive materials from a safe distance.</p>
+
+                    <div class="spec-grid">
+                        <div class="spec-item"><span class="spec-label">Resolution</span><span class="spec-value">4K UHD
+                                (30fps)</span></div>
+                        <div class="spec-item"><span class="spec-label">Storage</span><span class="spec-value">128GB
+                                Internal</span></div>
+                        <div class="spec-item"><span class="spec-label">Battery Life</span><span class="spec-value">3
+                                Hours Continuous</span></div>
+                        <div class="spec-item"><span class="spec-label">Lens Type</span><span class="spec-value">Pinhole
+                                / Vantablack</span></div>
+                        <div class="spec-item"><span class="spec-label">Connectivity</span><span
+                                class="spec-value">Wi-Fi Direct / App</span></div>
+                        <div class="spec-item"><span class="spec-label">Discretion</span><span class="spec-value">Class
+                                A (Undetectable)</span></div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-primary add-to-cart" data-id="ghost_cap"
+                            data-variant-id="gid://shopify/ProductVariant/53348593041741" data-name="Ghost-Cap 4K Pro"
+                            data-price="550.00">
+                            Add to Crate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="cart.js"></script>
+    <script src="main.js"></script>
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const btn = document.querySelector('.add-to-cart');
+        const productId = 'ghost_cap';
+
+        onSnapshot(doc(db, "inventory", productId), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const qty = data.qty || 0;
+
+                // Dynamic Price Limit Update
+                if (data.price) {
+                    const formatPrice = data.price.toFixed(2).replace('.', ',') + ' €';
+                    document.querySelector('.product-price').textContent = formatPrice;
+                    btn.dataset.price = data.price.toFixed(2);
+                }
+
+                if (qty < 1) {
+                    btn.disabled = true;
+                    btn.textContent = 'OUT OF STOCK';
+                    btn.style.background = '#333';
+                    btn.style.borderColor = '#555';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Add to Crate';
+                    btn.style.background = ''; // Reset to CSS default
+                    btn.style.borderColor = '';
+                    btn.style.cursor = 'pointer';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

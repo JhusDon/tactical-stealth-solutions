@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Status | TSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tracking-container {
+            max-width: 600px;
+            margin: var(--spacing-xl) auto;
+            text-align: center;
+            border: var(--glass-border);
+            padding: var(--spacing-md);
+            background: rgba(10, 10, 10, 0.8);
+        }
+
+        .status-result {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            border: 1px solid #333;
+            background: rgba(255, 255, 255, 0.05);
+            display: none;
+            text-align: left;
+        }
+
+        .status-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .status-step.active {
+            opacity: 1;
+            color: var(--accent-color);
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-step.active .status-icon {
+            background: var(--accent-color);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">TSS<span style="color:var(--accent-color)">.</span></div>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="manual.html" class="nav-link">Manual</a></li>
+                    <li><a href="index.html#contact" class="nav-link" style="color:var(--accent-color)">Secure
+                            Channel</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="tracking-container">
+                <h1>Mission Status</h1>
+                <p class="text-secondary">Enter your Order Reference ID to track equipment dispatch.</p>
+
+                <div style="margin-top:1.5rem; display:flex; gap:10px; justify-content:center">
+                    <input type="text" id="order-id" class="form-control" placeholder="Order ID (e.g. 7f8a...)"
+                        style="max-width:300px">
+                    <button id="track-btn" class="btn btn-primary">Locate</button>
+                </div>
+
+                <div id="result" class="status-result">
+                    <h3 style="border-bottom:1px solid #333; padding-bottom:0.5rem; margin-bottom:1rem">Transmission Log
+                    </h3>
+
+                    <div class="status-step active">
+                        <div class="status-icon"></div>
+                        <div>Order Received</div>
+                    </div>
+                    <div class="status-step" id="step-paid">
+                        <div class="status-icon"></div>
+                        <div>Payment Verified</div>
+                    </div>
+                    <div class="status-step" id="step-shipped">
+                        <div class="status-icon"></div>
+                        <div>Dispatched / In Transit</div>
+                    </div>
+
+                    <div id="tracking-info"
+                        style="margin-top:1.5rem; border-top:1px solid #333; padding-top:1rem; display:none">
+                        <p style="font-size:0.9rem; color:#888;">Secure Tracking Number:</p>
+                        <p style="font-family:'Courier New'; font-size:1.2rem; color:var(--accent-color)"
+                            id="tracking-number">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        document.getElementById('track-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('track-btn');
+            const input = document.getElementById('order-id');
+            const result = document.getElementById('result');
+            const orderId = input.value.trim();
+
+            if (!orderId) return;
+
+            btn.textContent = 'Scanning...';
+            btn.disabled = true;
+
+            try {
+                const docRef = doc(db, "orders", orderId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    result.style.display = 'block';
+
+                    // Reset steps
+                    document.getElementById('step-paid').classList.remove('active');
+                    document.getElementById('step-shipped').classList.remove('active');
+                    document.getElementById('tracking-info').style.display = 'none';
+
+                    // Update steps based on status
+                    if (data.status === 'paid' || data.status === 'shipped') {
+                        document.getElementById('step-paid').classList.add('active');
+                    }
+                    if (data.status === 'shipped') {
+                        document.getElementById('step-shipped').classList.add('active');
+
+                        if (data.trackingNumber) {
+                            document.getElementById('tracking-info').style.display = 'block';
+                            document.getElementById('tracking-number').textContent = data.trackingNumber;
+                        }
+                    }
+
+                } else {
+                    alert('Mission ID not found in secure archives.');
+                    result.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error getting document:", error);
+                alert('Connection error. Security protocol failed.');
+            } finally {
+                btn.textContent = 'Locate';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
