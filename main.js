@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAccess() {
         const input = accessCodeInput.value.toUpperCase().trim();
 
-        if (VALID_CODES.includes(input)) {
+        // Case-insensitive check
+        if (VALID_CODES.some(code => code.toUpperCase() === input)) {
             // Success
             sessionStorage.setItem(SESSION_KEY, 'true');
             unlockSite(false);
