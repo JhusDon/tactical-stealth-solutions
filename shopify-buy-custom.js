@@ -22,29 +22,53 @@ const shop = {
         }
     },
 
-    // Create Checkout with multiple items
+    // Create Checkout (using cartCreate mutation)
     createCheckout: async function (cartItems) {
-        if (!this.client) return;
+        const query = `
+            mutation cartCreate($input: CartInput!) {
+                cartCreate(input: $input) {
+                    cart {
+                        checkoutUrl
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            input: {
+                lines: cartItems.map(item => ({
+                    merchandiseId: item.variantId,
+                    quantity: item.qty
+                }))
+            }
+        };
 
         try {
-            // Create Checkout
-            const checkout = await this.client.checkout.create();
+            const response = await fetch(`https://${this.config.domain}/api/2023-01/graphql.json`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Storefront-Access-Token': this.config.storefrontAccessToken
+                },
+                body: JSON.stringify({ query, variables })
+            });
 
-            // Format line items for Shopify
-            const lineItemsToAdd = cartItems.map(item => ({
-                variantId: item.variantId,
-                quantity: item.qty
-            }));
+            const result = await response.json();
 
-            // Add Items
-            const newCheckout = await this.client.checkout.addLineItems(checkout.id, lineItemsToAdd);
-
-            // Redirect to Shopify Checkout
-            window.location.href = newCheckout.webUrl;
+            if (result.data && result.data.cartCreate && result.data.cartCreate.cart) {
+                window.location.href = result.data.cartCreate.cart.checkoutUrl;
+            } else {
+                console.error('TSS GraphQL Error:', result);
+                alert('Connection to Supply Drop failed. ' + JSON.stringify(result.userErrors || result.errors));
+            }
 
         } catch (e) {
-            console.error('TSS Error:', e);
-            alert('Secure Connection Failed. Please try again.');
+            console.error('TSS Network Error:', e);
+            alert('Secure Link Severed: ' + e.message);
         }
     },
 
