@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Simple client-side check for demo purposes
     // In production, this would be server-side or at least hashed
-    const VALID_CODES = ['GHOST-PROTOCOL', 'TSS-ADMIN', 'STEALTH', 'GHOSTPROTOCOL_V9'];
+    const VALID_CODES = ['Hades'];
     const SESSION_KEY = 'tss_access_granted';
 
     // Check if already logged in from previous session
