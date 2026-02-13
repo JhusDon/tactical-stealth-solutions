@@ -260,31 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tick();
         });
 
-        // Gyroscope (shared across all tilt containers)
-        if (window.DeviceOrientationEvent) {
-            const bindGyro = () => {
-                let bg = null, bb = null;
-                window.addEventListener('deviceorientation', (e) => {
-                    if (e.gamma === null) return;
-                    if (bg === null) { bg = e.gamma; bb = e.beta; }
-                    tiltContainers.forEach(c => {
-                        const card = c.querySelector('.tilt-card');
-                        if (!card) return;
-                        // Access the card's tilt state via data attributes
-                    });
-                }, { passive: true });
-            };
-
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                document.addEventListener('click', async () => {
-                    try {
-                        const p = await DeviceOrientationEvent.requestPermission();
-                        if (p === 'granted') bindGyro();
-                    } catch (e) { /* denied */ }
-                }, { once: true });
-            } else {
-                bindGyro();
-            }
-        }
     }
+
 });
