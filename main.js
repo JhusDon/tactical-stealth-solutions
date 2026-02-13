@@ -181,4 +181,110 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // ---- 3D Parallax Tilt Effect ----
+    const tiltContainers = document.querySelectorAll('.tilt-container');
+    if (tiltContainers.length > 0) {
+        const MAX_TILT = 15;
+        const EASE = 0.08;
+        const RESET = 0.05;
+
+        tiltContainers.forEach(container => {
+            const card = container.querySelector('.tilt-card');
+            const gloss = container.querySelector('.tilt-gloss');
+            if (!card) return;
+
+            let cx = 0, cy = 0, tx = 0, ty = 0, gx = 50, gy = 50;
+            let hovering = false;
+            let useGyro = false;
+            let autoT = Math.random() * 100; // offset so cards don't sync
+
+            // Mouse
+            container.addEventListener('mouseenter', () => { hovering = true; });
+            container.addEventListener('mouseleave', () => {
+                hovering = false;
+                tx = 0; ty = 0; gx = 50; gy = 50;
+            });
+            container.addEventListener('mousemove', (e) => {
+                if (!hovering) return;
+                const r = container.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width;
+                const y = (e.clientY - r.top) / r.height;
+                tx = (y - 0.5) * -2 * MAX_TILT;
+                ty = (x - 0.5) * 2 * MAX_TILT;
+                gx = x * 100;
+                gy = y * 100;
+            });
+
+            // Touch
+            container.addEventListener('touchmove', (e) => {
+                if (useGyro) return;
+                const t = e.touches[0];
+                const r = container.getBoundingClientRect();
+                const x = (t.clientX - r.left) / r.width;
+                const y = (t.clientY - r.top) / r.height;
+                tx = (y - 0.5) * -2 * MAX_TILT;
+                ty = (x - 0.5) * 2 * MAX_TILT;
+                gx = x * 100;
+                gy = y * 100;
+                hovering = true;
+            }, { passive: true });
+            container.addEventListener('touchend', () => {
+                hovering = false;
+                tx = 0; ty = 0; gx = 50; gy = 50;
+            });
+
+            // Animate
+            function tick() {
+                // Auto-rock on mobile when idle
+                const mobile = window.matchMedia('(max-width: 768px)').matches;
+                if (mobile && !hovering && !useGyro) {
+                    autoT += 0.015;
+                    tx = Math.sin(autoT * 0.7) * 4;
+                    ty = Math.sin(autoT) * 6;
+                    gx = 50 + Math.sin(autoT) * 15;
+                    gy = 50 + Math.cos(autoT * 0.7) * 10;
+                }
+
+                const e = hovering ? EASE : RESET;
+                cx += (tx - cx) * e;
+                cy += (ty - cy) * e;
+
+                card.style.transform = `rotateX(${cx.toFixed(2)}deg) rotateY(${cy.toFixed(2)}deg)`;
+                if (gloss) {
+                    gloss.style.background = `radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%, rgba(0, 255, 157, 0.1) 0%, transparent 55%)`;
+                }
+
+                requestAnimationFrame(tick);
+            }
+            tick();
+        });
+
+        // Gyroscope (shared across all tilt containers)
+        if (window.DeviceOrientationEvent) {
+            const bindGyro = () => {
+                let bg = null, bb = null;
+                window.addEventListener('deviceorientation', (e) => {
+                    if (e.gamma === null) return;
+                    if (bg === null) { bg = e.gamma; bb = e.beta; }
+                    tiltContainers.forEach(c => {
+                        const card = c.querySelector('.tilt-card');
+                        if (!card) return;
+                        // Access the card's tilt state via data attributes
+                    });
+                }, { passive: true });
+            };
+
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                document.addEventListener('click', async () => {
+                    try {
+                        const p = await DeviceOrientationEvent.requestPermission();
+                        if (p === 'granted') bindGyro();
+                    } catch (e) { /* denied */ }
+                }, { once: true });
+            } else {
+                bindGyro();
+            }
+        }
+    }
 });
