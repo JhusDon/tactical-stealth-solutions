@@ -50,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function unlockSite(immediate = false) {
         if (!accessGate || !mainContent) return;
 
+        // Release iOS zoom by blurring the input
+        if (accessCodeInput) accessCodeInput.blur();
+
         if (immediate) {
             accessGate.style.display = 'none';
             mainContent.classList.add('revealed');
@@ -62,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             accessGate.style.display = 'none';
             mainContent.classList.add('revealed');
+            window.scrollTo(0, 0); // Reset scroll position
         }, 500);
     }
 
