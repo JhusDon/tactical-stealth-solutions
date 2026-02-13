@@ -35,6 +35,18 @@
         "description": "High-end covert surveillance equipment for professionals."
     }
     </script>
+    <script>if (sessionStorage.getItem('tss_access_granted') === 'true') { document.documentElement.classList.add('gate-bypassed') }</script>
+    <style>
+        .gate-bypassed #access-gate {
+            display: none !important
+        }
+
+        .gate-bypassed .blur-content {
+            filter: none !important;
+            pointer-events: auto !important;
+            opacity: 1 !important
+        }
+    </style>
 </head>
 
 <body>

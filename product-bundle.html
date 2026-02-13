@@ -8,6 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script>if (sessionStorage.getItem('tss_access_granted') === 'true') { document.documentElement.classList.add('gate-bypassed') }</script>
+    <style>
+        .gate-bypassed #access-gate {
+            display: none !important
+        }
+
+        .gate-bypassed .blur-content {
+            filter: none !important;
+            pointer-events: auto !important;
+            opacity: 1 !important
+        }
+    </style>
 </head>
 
 <body>
