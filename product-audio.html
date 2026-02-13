@@ -5,42 +5,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stealth Audio Extension | Tactical Stealth Solutions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500;700&display=swap"
+    <meta name="description"
+        content="Stealth Audio Extension – professional-grade invisible earpiece with inductive loop for covert two-way communication.">
+    <meta name="theme-color" content="#050505">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Stealth Audio Extension",
+        "description": "Professional-grade invisible earpiece with inductive loop for covert communication.",
+        "brand": { "@type": "Brand", "name": "Tactical Stealth Solutions" },
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "EUR",
+            "price": "149.00",
+            "availability": "https://schema.org/InStock"
+        }
+    }
+    </script>
 </head>
 
 <body>
-    <header>
+
+    <!-- Header -->
+    <header id="site-header">
         <div class="container">
-            <nav>
-                <a href="index.html" class="logo">TSS<span style="color:var(--accent-color)">.</span></a>
-                <button class="hamburger" aria-label="Menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+            <nav aria-label="Main navigation">
+                <a href="index.html" class="logo" aria-label="TSS Home">TSS<span class="accent">.</span></a>
+                <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
                 </button>
-                <ul class="nav-links">
-                    <li><a href="index.html#products" class="nav-link">Equipment</a></li>
-                    <li><a href="manual.html" class="nav-link">Manual</a></li>
-                    <li><a href="index.html#contact" class="nav-link" style="color:var(--accent-color)">Secure
-                            Channel</a></li>
-                    <!-- Cart Trigger -->
-                    <li class="cart-trigger">
-                        <span>CRATE</span>
-                        <div class="cart-count">0</div>
+                <ul class="nav-links" role="menubar">
+                    <li role="none"><a href="index.html#products" class="nav-link" role="menuitem">Equipment</a></li>
+                    <li role="none"><a href="manual.html" class="nav-link" role="menuitem">Manual</a></li>
+                    <li role="none"><a href="index.html#contact" class="nav-link nav-link--accent"
+                            role="menuitem">Secure Channel</a></li>
+                    <li class="cart-trigger" role="none">
+                        <span>Crate</span>
+                        <div class="cart-count" aria-label="Cart items">0</div>
                     </li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Cart Overlay & Sidebar -->
-    <div id="cart-overlay" class="cart-overlay"></div>
-    <div id="cart-sidebar" class="cart-sidebar">
+    <!-- Cart -->
+    <div id="cart-overlay" class="cart-overlay" aria-hidden="true"></div>
+    <aside id="cart-sidebar" class="cart-sidebar" aria-label="Shopping cart">
         <div class="cart-header">
             <h2>Supply Crate</h2>
-            <button class="close-cart">×</button>
+            <button class="close-cart" aria-label="Close cart">×</button>
         </div>
         <div id="cart-items-container" class="cart-content"></div>
         <div class="cart-footer">
@@ -50,31 +73,37 @@
             </div>
             <button id="btn-shopify-checkout" class="checkout-btn">Proceed to Drop</button>
         </div>
-    </div>
+    </aside>
 
-    <div id="access-gate" class="access-gate">
+    <!-- Access Gate -->
+    <div id="access-gate" class="access-gate" role="dialog" aria-modal="true" aria-label="Access authentication">
         <div class="gate-content">
-            <div class="logo-large">TSS<span style="color:var(--accent-color)">.</span></div>
+            <div class="gate-scanline"></div>
+            <div class="logo-large">TSS<span class="accent">.</span></div>
             <h2>Restricted Access</h2>
-            <p>Authentication Required.</p>
+            <p class="gate-subtitle">Authentication Required.</p>
             <div class="input-group">
-                <input type="password" id="access-code" placeholder="ENTER CODE">
+                <input type="password" id="access-code" placeholder="ENTER CODE" aria-label="Access code"
+                    autocomplete="off">
                 <button id="access-btn" class="btn btn-primary">Decrypt</button>
             </div>
             <p id="error-msg" class="error-msg hidden">Access Denied.</p>
         </div>
     </div>
 
+    <!-- Main Content -->
     <main id="main-content" class="blur-content">
         <div class="container">
-            <div class="product-hero">
-                <div class="product-gallery">
-                    <img src="assets/processed/product_audio_tactical.png" alt="Stealth Audio Extension"
-                        class="product-detail-img">
+            <div class="product-hero" style="padding-top: calc(var(--spacing-xl) + 40px);">
+                <div class="product-gallery" data-animate="fade-up">
+                    <img src="assets/processed/product_audio_tactical.png"
+                        alt="Stealth Audio Extension – micro earpiece and inductive neck loop"
+                        class="product-detail-img" loading="lazy" width="600" height="600">
                 </div>
 
-                <div class="product-details">
+                <div class="product-details" data-animate="fade-up" style="--delay: 0.15s">
                     <a href="index.html#products" class="back-link">← Return to Portfolio</a>
+                    <p class="section-tag">Audio Series</p>
                     <h1 class="product-title">Stealth Audio Extension</h1>
                     <p class="product-price">1,00 €</p>
 
@@ -100,7 +129,7 @@
                     <div class="actions">
                         <button class="btn btn-primary add-to-cart" data-id="audio_ext"
                             data-variant-id="gid://shopify/ProductVariant/53348593107277"
-                            data-name="Stealth Audio Extension" data-price="149.00">
+                            data-name="Stealth Audio Extension" data-price="149.00" id="btn-add-audio">
                             Add to Crate
                         </button>
                     </div>
@@ -109,9 +138,28 @@
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer id="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="logo">TSS<span class="accent">.</span></span>
+                    <p>Tactical Stealth Solutions</p>
+                </div>
+                <nav class="footer-nav" aria-label="Footer navigation">
+                    <a href="index.html#products">Equipment</a>
+                    <a href="manual.html">Manual</a>
+                    <a href="index.html#contact">Secure Channel</a>
+                </nav>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 TSS. All rights reserved. Encrypted Connection.</p>
+            </div>
+        </div>
+    </footer>
+
     <script src="cart.js"></script>
     <script src="main.js"></script>
-    <!-- Shopify SDK -->
     <script src="https://sdks.shopifycdn.com/js-buy-sdk/v2/latest/index.umd.min.js"></script>
     <script src="shopify-buy-custom.js"></script>
     <script type="module">
@@ -126,7 +174,6 @@
                 const data = docSnap.data();
                 const qty = data.qty || 0;
 
-                // Dynamic Price Limit Update
                 if (data.price) {
                     const formatPrice = data.price.toFixed(2).replace('.', ',') + ' €';
                     document.querySelector('.product-price').textContent = formatPrice;
@@ -142,7 +189,7 @@
                 } else {
                     btn.disabled = false;
                     btn.textContent = 'Add to Crate';
-                    btn.style.background = ''; // Reset to CSS default
+                    btn.style.background = '';
                     btn.style.borderColor = '';
                     btn.style.cursor = 'pointer';
                 }
